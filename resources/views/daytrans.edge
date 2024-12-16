@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="clientId" content="{{ env('VITE_DAYTRANS_CLIENT_ID') }}">
+  <meta name="clientSecret" content="{{ env('VITE_DAYTRANS_CLIENT_SECRET') }}">
+  <meta name="website" content="https://www.daytrans.co.id/">
+  <meta name="environment" content="{{ env('NODE_ENV') }}">
+  <meta name="passwordRefreshApp" content="{{ env('PASSWORD_REFRESH_APP') }}">
+  <meta name="passwordLogout" content="{{ env('PASSWORD_LOGOUT') }}">
+  <meta name="passwordManualSettlement" content="{{ env('PASSWORD_MANUAL_SETTLEMENT') }}">
+  <meta name="color-scheme" content="light only">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.3.2"></script>
+  <title>KiosK Asmat System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+  <main>
+    <div id="app"></div>
+  </main>
+</body>
+  <script src="{{ mix('/js/daytrans.js') }}"></script>
+ 

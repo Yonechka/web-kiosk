@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkadonis_vite_vue=self.webpackChunkadonis_vite_vue||[]).push([[165],{3165:(e,n,t)=>{t.r(n),t.d(n,{default:()=>c});var u=t(9726);const s={},c=(0,t(6262).A)(s,[["render",function(e,n){return(0,u.openBlock)(),(0,u.createElementBlock)("div",null," It's 404 ")}]])}}]);

@@ -1,0 +1,350 @@
+<script setup>
+  import { useScheduleStore } from '@/store/ScheduleStore';
+  import { storeToRefs } from 'pinia';
+  import { reactive, computed, ref, watch , toRef } from 'vue';
+  import { formattingNumber, formattingNumberHuman, dmyStringToDate } from '@/utils';
+  import { useSeatsNo, useSelectSeats, useScrollIndicator, useInitialData } from '@/composeable/schedule';
+  import { useRouter } from 'vue-router';
+
+  import RoundtripLabel from '@/components/v2/Schedule/RoundtripLabel.vue';
+  import IcDeparturePrice from '@/components/v2/ic/IcDeparturePrice.vue';
+  import IcDestinationPrice from '@/components/v2/ic/IcDestinationPrice.vue';
+  import ModalDialogue from '@/components/v2/ModalDialogue.vue';
+
+  const props = defineProps({
+    isSelectScheduleError: Boolean,
+    isReturn: {
+      type: Boolean,
+      default: false
+    },
+    seats: Object,
+    selectedSeats: Array,
+    subTotalTicket: Number,
+    selectedDepartureTime: Object,
+    date: Date
+  });
+
+  /* Modal Dialogue */
+  const isModalDialogueShow = ref(false);
+
+  /* Error Handler */
+  const isError = toRef(() => props.isSelectScheduleError);
+
+  const router = useRouter();
+  const scheduleStore = useScheduleStore();
+
+  /* Initial Data */
+  const { isSeatsShow, isSeatsReturnShow, isDepTimeShow } = useInitialData();
+
+  /* Seats No */
+  const { seatsNo } = useSeatsNo();
+
+  /* Emit Back To Select Time */
+  const emit = defineEmits(['backToSelectTime']);
+  const backToSelectTime = () => emit('backToSelectTime');
+
+  /* Select Seat */
+  const { selectSeat, toReservation } = useSelectSeats(router, props.isReturn);
+
+  /* Logo Label */
+  const logoLabel = props.isReturn ? IcDestinationPrice : IcDeparturePrice;
+
+  /* Scroll Indicator */
+  const { seatsWrapper, isScrollMax, scrollSeatsWrapper, scrollBottom } = useScrollIndicator();
+
+  /* CTA Roundtrip label */
+  const ctaLabelRoundTrip = props.isReturn ? 'schedule.seats.selectDepartureSeatReturn' : 'schedule.seats.selectDepartureSeat';
+
+  /* Confirm Select seat handler */
+  const confirmSelectSeatHandler = () => {
+    const roundTripHandler = () => {
+      props.isReturn ? isSeatsReturnShow.value = false : isSeatsShow.value = false ;
+      isDepTimeShow.value = true;
+    }
+    scheduleStore.isRoundedTrip ? roundTripHandler() : isModalDialogueShow.value = true;
+  }
+
+  /* Cancel Select seat handler */
+  const cancelSelectSeatHandler = () => {
+    if (scheduleStore.isRoundedTrip) {
+      isDepTimeShow.value = true;
+      props.isReturn ? isSeatsReturnShow.value = false : isSeatsShow.value = false ;
+    } else {
+      backToSelectTime();
+    }
+  }
+
+  /* Seat Size px */
+  const seatsLayoutSize = ref('w-[64px] h-[64px] text-[20px]')
+  watch(props.seats, () => {
+    console.log('watch seats tiggered!')
+    if (props.seats.seats_layout.length > 30) {
+      seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+    } else if (props.seats.seats_layout.length > 20) {
+      seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+    } else if (props.seats.seats_layout.length > 19) {
+      if (props.seats.col < 5) {
+        seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+      } else {
+        seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+      }
+    } else if (props.seats.seats_layout.length > 14) {
+      seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+    } else if (props.seats.seats_layout.length > 12) {
+      seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+    } else {
+      seatsLayoutSize.value = 'w-[64px] h-[64px] text-[20px]'
+    }
+  })
+</script>
+
+<template>
+    <div class=" w-full h-full px-[56px] absolute top-0 left-0" :class="`bg-[${colors.primaryColor}]`">
+      <div class="w-full p-8 bg-white flex justify-between items-end rounded-[36px] my-8 relative">
+        <div class=" flex flex-col gap-3">
+          <div class=" flex w-full justify-between items-center">
+            <span class="text-xl text-[#71747D]">
+              {{ $d(props.date, 'short') }}
+            </span> 
+
+            <RoundtripLabel 
+              v-show="scheduleStore.isRoundedTrip"
+              :isReturn="props.isReturn"
+              class=" absolute right-8"
+            />
+          </div>
+          <div class=" text-2xl font-bold flex items-center gap-3">
+             <slot name="tripInformation"></slot>
+          </div>
+      </div>
+
+        <button
+          @click="backToSelectTime"
+          class=" text-lg font-semibold bg-transparent" :class="`text-[${colors.primaryColor}]`"
+          id="btnCancelSelectSeat"
+        >
+          {{ $t('schedule.change') }}
+        </button>
+      </div>
+
+      <div class="rounded-[35px] w-[645px] h-[1686px] relative" :class="`bg-[${colors.secondaryColor}]`">
+          <div v-show="isError" class="w-full h-full rounded-[35px] bg-white absolute top-0 left-0 z-10"></div>
+          <div
+            v-if="props.seats.isTimePassed"
+            class="w-full h-full bg-white rounded-[35px] text-[30px] absolute top-0 left-0 z-10 flex flex-col justify-center items-center"
+          >
+            <div class="mb-[20px] text-center">
+              {{ $t('schedule.seats.timePassed') }}
+            </div>
+            <div
+              @click="backToSelectTime"
+              class="p-[20px] text-white rounded-md text-center bg-teal-600"
+            > {{ $t('schedule.seats.chooseOther') }} </div>
+          </div>
+          <div class="flex justify-between pt-[33px] pl-[37px] pr-[32px] items-center">
+              <div class="flex items-center">
+                <img src="@/assets/images/left.png" @click="cancelSelectSeatHandler" class="w-8 mr-[15px] cursor-pointer">
+                <div
+                  class="font-medium text-2xl"
+                  :class="`text-[${colors.fontPrimaryColor}]`"
+                >{{ $t('schedule.seats.selectSeats') }}</div>
+              </div>
+          </div>
+          <div class="flex justify-center my-8">
+             <div class="flex items-center">
+                <img src="@/assets/images/terisi.png" class="w-[16px] h-[16px] mr-[13px]">
+                <div
+                  class="text-[16px] mr-[30px] text-[#71747D]">
+                  {{ $t('schedule.seats.booked') }}
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div
+                  class="h-[16px] w-[16px] rounded-[4px] border-2 mr-[13px]"
+                  :class="`border-[${colors.secondaryColor200}]`"
+                ></div>
+                <div
+                  class="text-[16px] mr-[30px] text-[#71747D]">
+                  {{ $t('schedule.seats.available') }}
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div
+                  class="border-1 h-[16px] w-[16px] mr-[13px] rounded-[4px]"
+                  :class="`bg-[${colors.primaryColor}]`"
+                ></div>
+                <div
+                  class="text-[16px] pr-[20px] text-[#71747D]">
+                  {{ $t('schedule.seats.selected') }}
+                </div>
+              </div>
+          </div>
+
+          <div class="text-center mb-4">
+              <div
+                class="text-[20px] font-bold text-center mb-[4px]"
+                :class="`text-[${colors.fontPrimaryColor}]`">
+                {{ props.selectedDepartureTime?.departure_time }}
+              </div>
+              <span v-if="props.seats && props.seats?.vehicle" class="text-[20px] font-medium" :class="`text-[${colors.fontSecondaryColor400}]`">
+                {{ $t('schedule.seats.transportationType') }} {{ props.seats.vehicle }}
+              </span>
+          </div>
+
+          <div class="flex justify-center mb-6">
+              <div class="bg-[#F5F5F5] rounded-[41px] text-center mx-auto px-8 py-2">
+                  <div class=" text-base text-[#1F2937] font-semibold">
+                    {{ $t('schedule.seats.front') }}
+                  </div>
+              </div>
+          </div>
+
+          <div class="w-full flex flex-col items-center justify-center relative">
+            
+            <slot name="overlaySpinner"></slot>
+            <div ref="seatsWrapper" class="w-auto h-auto min-h-[400px]  overflow-auto">
+                <div v-if="props.seats?.row" v-for="(layout, indexParent) in parseInt(props.seats?.row)" :key="indexParent" class=" w-auto mb-6 flex gap-x-6">
+                  <template v-if="props.seats.seats_layout.length > 0" v-for="(seat, index) in props.seats.seats_layout">
+                    <!-- <span v-if="seat.row == indexParent" class="bg-[green]"> {{ seat.row }} </span> -->
+                    <div
+                      v-if="seat.row == indexParent"
+                      class="font-bold flex items-center justify-center"
+                      :class="[seatsLayoutSize]"
+                    >
+
+                      <div v-if="seatsNo.includes(seat.label)" class="w-full h-full">
+                        <div
+                          v-if="seat.status != 'block'"
+                          @click="selectSeat(seat.label)"
+                          :id="`btnSelectSeat_${index+1}`"
+                          :data-seat="seat.label"
+                          :data-seat-price="seat.total_price"
+                          class="border-[2px] relative cursor-pointer w-full h-full rounded-[15px] flex items-center justify-center"
+                          :class="[seat.isSelected ? `bg-[${colors.primaryColor}] text-[${colors.secondaryColor}]` : '', `border-[${colors.secondaryColor200}]`]"
+                        >
+                          {{ seat.label }}
+                          <div
+                            class="absolute text-xs py-1 px-2 rounded-[12px] bottom-[-12px]"
+                            :class="[`bg-[${colors.accentColor}]`, `text-[${colors.fontSecondaryColor}]`]"
+                          >
+                            {{ formattingNumberHuman(seat.total_price) }}
+                          </div>
+                        </div>
+                        <img v-else
+                          :id="`btnSelectSeat_${index+1}`"
+                          class="reservedSeat"
+                          src="@/assets/images/terisi.png"
+                          :class="[seatsLayoutSize]"
+                        >
+                      </div>
+
+                      <div v-else-if="seat.status == 's'">
+                          <img
+                            src="@/assets/images/ic_driver.png"
+                            alt="ic-driver"
+                            :id="`btnSelectSeat_${index+1}`"
+                            class="driverSeat"
+                          >
+                      </div>
+
+                      <div v-else-if="seat.status == 'px'">
+                        <img
+                          src="@/assets/images/terisi.png"
+                          :id="`btnSelectSeat_${index+1}`"
+                          :class="[seatsLayoutSize]"
+                          class="disabledSeat"
+                        >
+                      </div>
+
+                      
+                      <div v-else></div>
+                    
+                    </div>
+                  </template>
+                </div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-[40px] w-full">
+            <!-- Harga -->
+            <div v-if="props.selectedSeats.length" class=" pl-[37px] mb-8">
+              <div class="text-[#71747D] text-xl">
+                {{ $t('schedule.seats.totalPrice') }}
+              </div>
+              <div 
+                :data-subtotal-ticket="props.subTotalTicket"
+                class="font-semibold text-[32px]"
+                :class="`text-${colors.fontPrimaryColor}`"
+              >
+                  Rp. {{ formattingNumber(props.subTotalTicket) }}
+              </div>
+            </div>
+            
+
+            <!-- Next -->
+            <div class="flex justify-center px-[23px] items-center">
+                <div
+                  @click="confirmSelectSeatHandler" class="flex justify-center w-full rounded-[26px] py-[14px]"
+                  :class="[ props.selectedSeats.length ? `bg-[${colors.accentSecondaryColor}] cursor-pointer` : `bg-[#71747D] cursor-not-allowed` ]"
+                  id="btnToReservation"
+                >
+                    <div class="flex items-center">
+                        <div class="font-bold text-2xl" :class="`text-[${colors.secondaryColor}]`">
+                          <span v-show="scheduleStore.isRoundedTrip">
+                            {{ $t(ctaLabelRoundTrip) }}
+                          </span>
+
+                          <span v-show="!scheduleStore.isRoundedTrip">
+                            {{ $t('schedule.seats.continue') }}
+                          </span>
+                          
+                        </div>
+                        <img src="@/assets/images/next.png" class="pl-[16.25px]">
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <Teleport to=".appWrapper">
+        <Transition>
+          <ModalDialogue
+            v-if="isModalDialogueShow"
+            @onClickCancel="isModalDialogueShow = false"
+            @onClickConfirm="() => {
+              isModalDialogueShow = false;
+              toReservation();
+            }"
+          >
+            <template #header>
+              Konfirmasi Pilihan Anda
+            </template>
+
+            <template #content>
+              <div class="w-full flex flex-col gap-4">
+                <div>
+                  Anda telah memilih waktu keberangkatan sebagai berikut:
+                </div>
+
+                <!-- Departure -->
+                <div>
+                  <div>
+                    Waktu Keberangkatan:
+                  </div>
+                  <div class=" text-xl text-[#1F2937] font-medium">
+                    {{ $d(dmyStringToDate(scheduleStore?.selectedDepartureTime?.departure_date), 'short') }}, 
+                    {{ scheduleStore.selectedDepartureTime?.departure_time }} WIB
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template #confirmCta>
+              Lanjut ke Isi No. Telp
+            </template>
+          </ModalDialogue>
+        </Transition>
+      </Teleport>
+    </div>
+</template>
+

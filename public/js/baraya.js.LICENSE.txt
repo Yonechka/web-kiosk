@@ -1,0 +1,54 @@
+/*!
+  * shared v9.9.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+
+/*!
+  * vue-i18n v9.9.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+
+/*!
+  * vue-router v4.0.13
+  * (c) 2022 Eduardo San Martin Morote
+  * @license MIT
+  */
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*!
+ * GSAP 3.12.5
+ * https://gsap.com
+ *
+ * @license Copyright 2008-2024, GreenSock. All rights reserved.
+ * Subject to the terms at https://gsap.com/standard-license or for
+ * Club GSAP members, the agreement issued with that membership.
+ * @author: Jack Doyle, jack@greensock.com
+*/
+
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+/**
+ * [js-sha256]{@link https://github.com/emn178/js-sha256}
+ *
+ * @version 0.9.0
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2014-2017
+ * @license MIT
+ */
